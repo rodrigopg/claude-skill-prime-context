@@ -1,0 +1,20 @@
+{
+  "name": "prime-context",
+  "version": "2.0.0",
+  "description": "On-demand project context loading — thin AGENTS.md router, area context files read only when the task needs them, structure audit (doctor), and drift warnings at session start",
+  "author": {
+    "name": "Rodrigo Gonçalves",
+    "url": "https://github.com/rodrigopg"
+  },
+  "repository": "https://github.com/rodrigopg/claude-skill-prime-context",
+  "license": "MIT",
+  "keywords": [
+    "claude-code",
+    "context",
+    "AGENTS.md",
+    "CLAUDE.md",
+    "token-efficiency",
+    "memory",
+    "on-demand"
+  ]
+}
