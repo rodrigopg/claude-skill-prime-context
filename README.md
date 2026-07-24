@@ -34,6 +34,13 @@ drift is impossible.
 As a plugin (recommended — enables the session-start drift warnings):
 
 ```bash
+claude plugin marketplace add rodrigopg/claude-plugins
+claude plugin install prime-context@rodrigopg
+```
+
+Or from this repo's own marketplace:
+
+```bash
 claude plugin marketplace add rodrigopg/claude-skill-prime-context
 claude plugin install prime-context@prime-context-marketplace
 ```
