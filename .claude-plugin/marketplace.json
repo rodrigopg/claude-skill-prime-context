@@ -1,6 +1,6 @@
 {
   "name": "prime-context-marketplace",
-  "description": "Marketplace for prime-context, an on-demand context loading plugin for Claude Code",
+  "description": "Marketplace for prime-context, a self-learning project context plugin for Claude Code",
   "owner": {
     "name": "Rodrigo Gonçalves"
   },
@@ -8,7 +8,7 @@
     {
       "name": "prime-context",
       "source": "./",
-      "description": "Thin AGENTS.md router + on-demand area context files + structure doctor"
+      "description": "Self-learning context: bare call captures session learnings; thin AGENTS.md router + on-demand area context files + structure doctor"
     }
   ]
 }

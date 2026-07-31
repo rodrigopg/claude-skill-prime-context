@@ -1,7 +1,7 @@
 ---
 name: prime-context
-description: On-demand project context loading with a thin AGENTS.md router. Loads area-specific context files only when the task needs them, refactors bloated AGENTS.md/CLAUDE.md into the thin architecture, bootstraps new projects, and audits the context structure for drift. Commands: load (default), improve, setup, doctor.
-argument-hint: "[area|improve|setup|doctor]"
+description: Self-learning project context with a thin AGENTS.md router. Called with no argument it LEARNS — captures this session's corrections, decisions and pitfalls into .claude/context/<area>.md files. With an area name it loads that area's context on demand. Also refactors bloated AGENTS.md/CLAUDE.md into the thin architecture, bootstraps new projects, and audits the structure for drift. Commands: learn (default), <area> (load), improve, setup, doctor.
+argument-hint: "[learn|area|improve|setup|doctor] (empty = learn)"
 allowed-tools: [Read, Glob, Grep, Edit, Write, Bash]
 ---
 
@@ -15,9 +15,9 @@ Manage project context efficiently — never load everything at once.
 Detailed content lives in `.claude/context/<area>.md` and is read **only when the task requires it**.
 AGENTS.md contains only: overview (2 lines), routing table, non-negotiable rules, PR checklist.
 
-This is the **read path** of project memory: it assembles the right context into a session.
-It pairs naturally with write-path tools (e.g. claude-reflect) that persist learnings out of sessions —
-prime-context reads the very files those tools produce.
+This skill covers both directions: `<area>` is the **read path** (assemble the right
+context into a session); the bare call is the **write path** (`learn` — persist this
+session's learnings into those same files, so the next session starts smarter).
 
 ## MEMORY.md format (specification)
 
@@ -39,24 +39,47 @@ Each referenced memory file is self-contained Markdown, optionally with frontmat
 
 ---
 
-## Command: `load` (default — no argument, or an area name)
+## Command: `learn` (default — no argument, or the literal word `learn`)
 
-Load context for the current project on demand.
+Capture what this session taught into the context files. Claude Code already loads
+AGENTS.md/CLAUDE.md at session start — re-reading it adds nothing. The bare call's job
+is the opposite direction: **write the session's learnings down** so the next session
+starts smarter.
+
+**Flow:**
+1. Review the current conversation for durable learnings: user corrections, decisions
+   made, pitfalls hit, commands/configs discovered, gotchas that cost time. Ignore
+   anything only relevant to this one task.
+2. Route each learning:
+   - Area-specific → append to the matching `.claude/context/<area>.md` (fuzzy-match
+     as in `load`). No matching area → propose creating one (file + routing-table row).
+   - User preference → a file in `~/.claude/projects/<hash>/memory/` plus a pointer
+     line in `MEMORY.md` (create the directory and the MEMORY.md spec header if absent).
+3. Before appending, check the target file — skip anything already recorded; update in
+   place if the learning supersedes an existing line.
+4. Report one bullet per learning written, with its destination file. Nothing durable
+   in the session → say `learn: nothing new` and stop. Never touch AGENTS.md itself
+   (rules there are managed via `improve`).
+
+---
+
+## Command: `load` (an area name as argument)
+
+Load one area's context on demand.
 
 **Flow:**
 1. Read `~/.claude/projects/<hash>/memory/MEMORY.md` if it exists; then read every file it lists.
    Skip silently if there is no memory directory — memory is optional.
-2. Resolve the area argument, if given:
+2. Resolve the area argument:
    - Exact filename match on `.claude/context/<area>.md` wins.
    - Otherwise case-insensitive substring match against files in `.claude/context/`
      (e.g. `filament` matches `php-filament.md`).
    - Zero or multiple matches → list the available areas and ask which one.
-3. No argument: read `AGENTS.md` (or `CLAUDE.md`) and present the general summary.
-4. If the task at hand clearly touches several areas, read the relevant files in parallel.
+3. If the task at hand clearly touches several areas, read the relevant files in parallel.
 
 **Output format:**
 ```
-## Context loaded — <area or "general">
+## Context loaded — <area>
 
 ### Relevant now
 <3-5 critical points for this session>
@@ -202,7 +225,8 @@ End with `doctor: N findings` or `doctor: clean`. Offer to apply fixes only afte
 
 ## General rules
 
-- Never modify context files during `load` — read only.
+- Never modify context files during `load` — read only. Writes happen only via `learn`,
+  `improve`, and `setup`.
 - Blocks auto-managed by MCP servers are untouchable.
 - Memory files are point-in-time — warn when > 7 days without updates.
-- Unrecognized mode: list available commands (`load`, `improve`, `setup`, `doctor`) and ask.
+- Unrecognized mode: list available commands (`learn`, `<area>`, `improve`, `setup`, `doctor`) and ask.

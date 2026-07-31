@@ -25,10 +25,7 @@ def main() -> int:
     if not agents.is_file():
         agents = root / "CLAUDE.md"
     if agents.is_file():
-        try:
-            text = agents.read_text(encoding="utf-8", errors="replace")
-        except OSError:
-            return 0
+        text = agents.read_text(encoding="utf-8", errors="replace")
         routed = set(re.findall(r"\.claude/context/([\w.-]+)\.md", text))
         dangling = sorted(r for r in routed if r not in areas)
         orphans = sorted(a for a in areas if a not in routed)
