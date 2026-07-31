@@ -1,7 +1,7 @@
 {
   "name": "prime-context",
-  "version": "2.0.0",
-  "description": "On-demand project context loading — thin AGENTS.md router, area context files read only when the task needs them, structure audit (doctor), and drift warnings at session start",
+  "version": "3.0.0",
+  "description": "Self-learning project context — bare /prime-context captures the session's learnings into area context files; /prime-context <area> loads context on demand; thin AGENTS.md router, structure audit (doctor), drift warnings at session start",
   "author": {
     "name": "Rodrigo Gonçalves",
     "url": "https://github.com/rodrigopg"

@@ -9,18 +9,17 @@ A Claude Code plugin for efficient project context: a **thin AGENTS.md router** 
 every conversation. Detailed content lives in `.claude/context/<area>.md` and is read
 **only when the task requires it**.
 
-prime-context is the **read path** of project memory: it assembles the right context into a
-session. It pairs naturally with write-path tools like
-[claude-reflect](https://github.com/BayramAnnakov/claude-reflect) (which persists learnings
-out of sessions) and with audit tools like
-[claude-docu-optimizer](https://github.com/kojott/claude-docu-optimizer) (whose CLAUDE.md
-rubric this plugin's `improve`/`doctor` commands apply at restructure time).
+prime-context covers both directions of project memory: `<area>` is the **read path**
+(assemble the right context into a session) and the bare call is the **write path**
+(`learn` — persist the session's learnings into those same files). Audit tools like
+[claude-docu-optimizer](https://github.com/kojott/claude-docu-optimizer) inspired the
+CLAUDE.md rubric that `improve`/`doctor` apply.
 
 ## Commands
 
 | Command | What it does |
 |---------|--------------|
-| `/prime-context` | Load general context for the current project (memory + AGENTS.md) |
+| `/prime-context` | **Learn**: capture this session's corrections, decisions and pitfalls into the context files |
 | `/prime-context <area>` | Load one area's context (e.g. `filament`, `api`, `prod`); fuzzy-matches file names |
 | `/prime-context improve` | Refactor a bloated `AGENTS.md` → thin router + `.claude/context/` files |
 | `/prime-context setup` | Bootstrap the context structure in a new project from scratch |

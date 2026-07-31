@@ -3,6 +3,15 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [SemVer](https://semver.org/).
 
+## [3.0.0] - 2026-07-31
+
+### Changed
+- **BREAKING: bare `/prime-context` now means `learn`, not `load`.** Claude Code already
+  loads AGENTS.md/CLAUDE.md at session start, so the old no-argument "general load" was
+  redundant. The bare call now captures the current session's corrections, decisions and
+  pitfalls into `.claude/context/<area>.md` (or memory for user preferences), skipping
+  what's already recorded. `/prime-context <area>` still loads an area on demand.
+
 ## [2.0.0] - 2026-07-17
 
 ### Added
