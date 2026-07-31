@@ -37,13 +37,6 @@ claude plugin marketplace add rodrigopg/claude-plugins
 claude plugin install prime-context@rodrigopg
 ```
 
-Or from this repo's own marketplace:
-
-```bash
-claude plugin marketplace add rodrigopg/claude-skill-prime-context
-claude plugin install prime-context@prime-context-marketplace
-```
-
 Or manually as a bare skill (no hooks):
 
 ```bash
