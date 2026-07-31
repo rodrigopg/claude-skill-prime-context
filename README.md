@@ -25,8 +25,8 @@ CLAUDE.md rubric that `improve`/`doctor` apply.
 | `/prime-context setup` | Bootstrap the context structure in a new project from scratch |
 | `/prime-context doctor` | Audit the structure: dangling routes, orphan files, dead memory pointers, staleness, weight |
 
-Every `load` ends with a **Verification** block listing the files actually read — so silent
-drift is impossible.
+Every `/prime-context <area>` load ends with a **Verification** block listing the files
+actually read — so silent drift is impossible.
 
 ## Installation
 

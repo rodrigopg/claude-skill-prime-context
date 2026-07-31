@@ -1,7 +1,7 @@
 ---
 name: prime-context
 description: Self-learning project context with a thin AGENTS.md router. Called with no argument it LEARNS — captures this session's corrections, decisions and pitfalls into .claude/context/<area>.md files. With an area name it loads that area's context on demand. Also refactors bloated AGENTS.md/CLAUDE.md into the thin architecture, bootstraps new projects, and audits the structure for drift. Commands: learn (default), <area> (load), improve, setup, doctor.
-argument-hint: "[area|improve|setup|doctor]"
+argument-hint: "[learn|area|improve|setup|doctor] (empty = learn)"
 allowed-tools: [Read, Glob, Grep, Edit, Write, Bash]
 ---
 
@@ -39,7 +39,7 @@ Each referenced memory file is self-contained Markdown, optionally with frontmat
 
 ---
 
-## Command: `learn` (default — no argument)
+## Command: `learn` (default — no argument, or the literal word `learn`)
 
 Capture what this session taught into the context files. Claude Code already loads
 AGENTS.md/CLAUDE.md at session start — re-reading it adds nothing. The bare call's job
@@ -53,8 +53,8 @@ starts smarter.
 2. Route each learning:
    - Area-specific → append to the matching `.claude/context/<area>.md` (fuzzy-match
      as in `load`). No matching area → propose creating one (file + routing-table row).
-   - Cross-project or user preference → a file in `~/.claude/projects/<hash>/memory/`
-     plus a pointer line in `MEMORY.md`.
+   - User preference → a file in `~/.claude/projects/<hash>/memory/` plus a pointer
+     line in `MEMORY.md` (create the directory and the MEMORY.md spec header if absent).
 3. Before appending, check the target file — skip anything already recorded; update in
    place if the learning supersedes an existing line.
 4. Report one bullet per learning written, with its destination file. Nothing durable
