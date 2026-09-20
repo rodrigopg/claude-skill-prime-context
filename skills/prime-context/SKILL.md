@@ -55,11 +55,23 @@ starts smarter.
      as in `load`). No matching area → propose creating one (file + routing-table row).
    - User preference → a file in `~/.claude/projects/<hash>/memory/` plus a pointer
      line in `MEMORY.md` (create the directory and the MEMORY.md spec header if absent).
-3. Before appending, check the target file — skip anything already recorded; update in
-   place if the learning supersedes an existing line.
-4. Report one bullet per learning written, with its destination file. Nothing durable
-   in the session → say `learn: nothing new` and stop. Never touch AGENTS.md itself
-   (rules there are managed via `improve`).
+3. **Check for contradicted memories, not just new ones.** For every memory file touched
+   by this session's topic (same file, or linked via `[[name]]` from one that is), check
+   whether a specific claim it makes — a host, path, account owner, version, "current
+   state of X" — is contradicted by evidence seen this session (a file read, a command
+   result, a user statement). A contradicted claim is not an append target: **rewrite**
+   the memory (current facts first, superseded history below, old claim struck through
+   or moved to a clearly marked "historical" section) rather than tacking an "update"
+   paragraph onto unchanged prose. If the whole file's premise died (e.g. the resource
+   it describes no longer exists or isn't the user's anymore), delete the file and its
+   MEMORY.md pointer line instead of leaving a corpse — don't invent this without
+   evidence: only rewrite/delete what this session actually contradicted, leave
+   everything else untouched.
+4. For learnings that don't contradict anything, check the target file — skip anything
+   already recorded; update in place if the learning supersedes an existing line.
+5. Report one bullet per learning written or memory rewritten/deleted, with its
+   destination file. Nothing durable in the session → say `learn: nothing new` and stop.
+   Never touch AGENTS.md itself (rules there are managed via `improve`).
 
 ---
 
