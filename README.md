@@ -3,6 +3,19 @@
 A Claude Code plugin for efficient project context: a **thin AGENTS.md router** plus
 **area context files loaded on demand** — never everything at once.
 
+## Quick start
+
+| Want to | Run Prime Context with |
+| --- | --- |
+| Share rules and curated memory across assistants | `setup shared` |
+| Load context for an area | The area name, such as `api` |
+| Record a durable learning | `learn` |
+| Check instructions and memory links | `doctor` |
+| Inspect or enable session compaction | `compaction status` or `compaction enable` |
+
+In Claude Code, invoke `/prime-context:prime-context <mode>`. In Codex and
+OpenCode, ask the assistant to use the Prime Context skill with that mode.
+
 ## Philosophy
 
 `AGENTS.md` must be **thin**. It is loaded in every session — every line costs tokens in
@@ -23,6 +36,7 @@ CLAUDE.md rubric that `improve`/`doctor` apply.
 | `/prime-context <area>` | Load one area's context (e.g. `filament`, `api`, `prod`); fuzzy-matches file names |
 | `/prime-context improve` | Refactor a bloated `AGENTS.md` → thin router + `.claude/context/` files |
 | `/prime-context setup` | Bootstrap the context structure in a new project from scratch |
+| `/prime-context setup shared` | Share rules and curated memory across Claude Code, Codex, and OpenCode |
 | `/prime-context doctor` | Audit the structure: dangling routes, orphan files, dead memory pointers, staleness, weight |
 
 Every `/prime-context <area>` load ends with a **Verification** block listing the files
@@ -43,6 +57,41 @@ Or manually as a bare skill (no hooks):
 git clone https://github.com/rodrigopg/claude-skill-prime-context /tmp/prime-context
 cp -r /tmp/prime-context/skills/prime-context ~/.claude/skills/
 ```
+
+### Codex and OpenCode
+
+For a fresh install, run the following after the release reaches the default branch:
+
+```sh
+git clone https://github.com/rodrigopg/claude-skill-prime-context ~/prime-context
+mkdir -p ~/.agents/skills
+cp -R ~/prime-context/skills/prime-context ~/.agents/skills/
+```
+
+Open a new session and ask it to use the `prime-context` skill. To update, pull
+the checkout and copy the skill folder again. The portable skill includes all
+references and assets. Your project and personal memory files remain outside it.
+
+## Shared context across harnesses
+
+Run `/prime-context setup shared` in Claude Code. For Codex and OpenCode, copy
+`skills/prime-context/` into `~/.agents/skills/prime-context/` and ask the
+assistant to use Prime Context in `setup shared` mode. See the
+[shared setup guide](skills/prime-context/references/shared-setup.md).
+
+Retain the existing standalone setup for projects whose context is local to Claude Code.
+
+## Session compaction
+
+Use `compaction status` to inspect current behavior, `compaction enable` to
+opt in, and `compaction disable` to restore the previous settings. Claude Code
+uses the bundled hook, Codex can apply a custom prompt with local compaction,
+and OpenCode v2 uses its own summary and buffer. Codex remote compaction keeps
+the provider's summary policy. See the [compaction guide](skills/prime-context/references/compaction.md).
+
+If you installed `share-harness-instructions`, use `setup shared` to check your
+existing Markdown paths. Once Prime Context is available in a new session,
+remove the older skill or plugin. Your existing rules and memories stay in place.
 
 ## Structure managed by the plugin
 

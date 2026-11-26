@@ -1,7 +1,7 @@
 ---
 name: prime-context
-description: Self-learning project context with a thin AGENTS.md router. Called with no argument it LEARNS — captures this session's corrections, decisions and pitfalls into .claude/context/<area>.md files. With an area name it loads that area's context on demand. Also refactors bloated AGENTS.md/CLAUDE.md into the thin architecture, bootstraps new projects, and audits the structure for drift. Commands: learn (default), <area> (load), improve, setup, doctor.
-argument-hint: "[learn|area|improve|setup|doctor] (empty = learn)"
+description: Manage thin AGENTS.md files, load context by area, capture durable learnings, and audit project context. Use setup shared to share rules and curated memory across Claude Code, Codex, and OpenCode. Use compaction to inspect or configure native session summarization.
+argument-hint: "[learn|area|improve|setup|setup shared|compaction|doctor] (empty = learn)"
 allowed-tools: [Read, Glob, Grep, Edit, Write, Bash]
 ---
 
@@ -18,6 +18,13 @@ AGENTS.md contains only: overview (2 lines), routing table, non-negotiable rules
 This skill covers both directions: `<area>` is the **read path** (assemble the right
 context into a session); the bare call is the **write path** (`learn` — persist this
 session's learnings into those same files, so the next session starts smarter).
+
+## Memory location
+
+When shared context is configured, use its global index for cross-project notes and
+resolve private project memory through the shared project index by Git origin. For
+unregistered projects, use the existing Claude project memory location below.
+See [Shared setup](references/shared-setup.md) for the mapping and index locations.
 
 ## MEMORY.md format (specification)
 
@@ -53,8 +60,10 @@ starts smarter.
 2. Route each learning:
    - Area-specific → append to the matching `.claude/context/<area>.md` (fuzzy-match
      as in `load`). No matching area → propose creating one (file + routing-table row).
-   - User preference → a file in `~/.claude/projects/<hash>/memory/` plus a pointer
-     line in `MEMORY.md` (create the directory and the MEMORY.md spec header if absent).
+   - Personal learning → a note and a pointer in the selected private memory
+     index. Use the shared global index for a confirmed cross-project preference,
+     the shared project index for a project-specific note, or the existing Claude
+     project memory when shared context is not configured.
 3. **Check for contradicted memories, not just new ones.** For every memory file touched
    by this session's topic (same file, or linked via `[[name]]` from one that is), check
    whether a specific claim it makes — a host, path, account owner, version, "current
@@ -80,8 +89,9 @@ starts smarter.
 Load one area's context on demand.
 
 **Flow:**
-1. Read `~/.claude/projects/<hash>/memory/MEMORY.md` if it exists; then read every file it lists.
-   Skip silently if there is no memory directory — memory is optional.
+1. If shared context is configured, consult the applicable indexes and load only
+   notes relevant to the area. Otherwise read the legacy Claude project index and
+   its linked files if it exists. Disclose broken pointers in Verification.
 2. Resolve the area argument:
    - Exact filename match on `.claude/context/<area>.md` wins.
    - Otherwise case-insensitive substring match against files in `.claude/context/`
@@ -178,6 +188,14 @@ If a task touches multiple areas, read the relevant files in parallel.
 
 ---
 
+## Command: `setup shared`
+
+Use [Shared setup](references/shared-setup.md) to connect existing global rules,
+repository instructions, and curated memory across Claude Code, Codex, and OpenCode.
+Match the complete `setup shared` argument before the standalone `setup` command.
+
+---
+
 ## Command: `setup`
 
 **Goal:** configure the context structure from scratch in a new project.
@@ -212,6 +230,14 @@ and how to add learnings (a file in `memory/` + a pointer line in `MEMORY.md`).
 
 ---
 
+## Command: `compaction [status|enable|disable]`
+
+Use [Compaction](references/compaction.md). Bare `compaction` means `status` and is
+read-only. `enable` and `disable` apply to the active harness unless the user
+names another one. Resolve the complete command before matching an area name.
+
+---
+
 ## Command: `doctor`
 
 **Goal:** audit the context structure for drift. Read-only — reports, never fixes silently.
@@ -221,7 +247,7 @@ and how to add learnings (a file in `memory/` + a pointer line in `MEMORY.md`).
 1. **Dangling routes** — entries in the AGENTS.md routing table whose
    `.claude/context/<area>.md` file does not exist.
 2. **Orphan context files** — files in `.claude/context/` missing from the routing table.
-3. **Dead memory pointers** — lines in MEMORY.md referencing files that don't exist.
+3. **Dead memory pointers** — lines in the selected MEMORY.md referencing files that don't exist. In shared mode, also check entrypoints and the project index mapping.
 4. **Stale memory** — newest memory file older than 7 days.
 5. **AGENTS.md weight** — line count and approximate token estimate (~4 chars/token);
    flag over ~150 lines / 2.5k tokens, hard-flag over 4k tokens.
@@ -238,7 +264,8 @@ End with `doctor: N findings` or `doctor: clean`. Offer to apply fixes only afte
 ## General rules
 
 - Never modify context files during `load` — read only. Writes happen only via `learn`,
-  `improve`, and `setup`.
+  `improve`, `setup`, and `setup shared`. Change compaction settings only through
+  the explicit `compaction enable` or `compaction disable` workflow.
 - Blocks auto-managed by MCP servers are untouchable.
 - Memory files are point-in-time — warn when > 7 days without updates.
-- Unrecognized mode: list available commands (`learn`, `<area>`, `improve`, `setup`, `doctor`) and ask.
+- Unrecognized mode: list available commands (`learn`, `<area>`, `improve`, `setup`, `setup shared`, `compaction`, `doctor`) and ask.

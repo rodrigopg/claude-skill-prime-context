@@ -17,3 +17,4 @@ jobs:
         with:
           python-version: "3.x"
       - run: python tests/test_session_start.py
+      - run: python tests/test_pre_compact.py
