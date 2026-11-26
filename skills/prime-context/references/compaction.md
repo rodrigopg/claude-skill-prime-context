@@ -1,6 +1,6 @@
 # Compaction
 
-Compaction preserves session continuity. Use `learn` for durable project knowledge.
+Prime Context is the single owner of the compaction policy. Use `learn` for durable project knowledge.
 The [summary policy](../assets/compaction-policy.md) describes what matters after a
 session is compacted.
 
@@ -10,8 +10,14 @@ session is compacted.
   threshold and any custom summary prompt or hook. Identify project and managed
   overrides before claiming what applies to the session.
 - **`compaction enable`** applies the appropriate settings below. Start with status.
-  Preserve unrelated settings and earlier thresholds. If a competing hook or
-  custom prompt exists, show the overlap and ask which should be used.
+  Preserve unrelated settings. If another `PreCompact` hook supplies a policy,
+  show its command and ask the user to approve replacing it. On approval, back
+  up the affected settings, remove that hook entry, and enable Prime Context
+  at the existing threshold. Keep one policy active. `shared_sync.py doctor`
+  checks for overlapping `PreCompact` policies.
+
+Doctor reads the Claude settings in `$CLAUDE_CONFIG_DIR` or `~/.claude`.
+Use `doctor --claude-home DIR` for another Claude configuration.
 - **`compaction disable`** restores only the settings changed by this command.
   The harness can continue using its built-in compaction.
 
@@ -38,11 +44,11 @@ these keys into the existing `env` object of user settings:
 }
 ```
 
-Keep a configured threshold below 85. The percentage refers to Claude's
+Keep the existing threshold when replacing a policy, and keep a configured
+threshold below 85 when enabling for the first time. The percentage refers to Claude's
 auto-compact window. Claude adds the policy to the summary instructions. The
 hook is silent without the opt-in flag and applies to automatic compaction.
-If a DataAgile PreCompact hook already supplies a policy, coordinate the
-replacement before enabling Prime Context. Preserve unrelated hooks.
+Preserve unrelated hooks.
 
 ## Codex
 
@@ -79,7 +85,7 @@ applicable summary settings but does not exercise Claude's auto-only hook.
 Verify that hook separately with the opt-in flag and confirm the configured
 threshold in a real automatic compaction before claiming a runtime result.
 
-The Claude approach builds on the [proposal by João Vitor Ribeiro Santos](https://github.com/dataagile/claude-marketplace/pull/205).
+The Claude approach builds on the [compaction proposal](https://github.com/dataagile/claude-marketplace/pull/205).
 
 - [Claude Code hooks](https://code.claude.com/docs/en/hooks#precompact)
 - [Codex local and remote compaction paths](https://github.com/openai/codex/blob/main/codex-rs/core/src/tasks/compact.rs)

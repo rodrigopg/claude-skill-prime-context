@@ -3,6 +3,19 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [SemVer](https://semver.org/).
 
+## [3.2.0] - 2026-11-26
+
+### Added
+
+- Versioned shared rules and memory layout, with a portable CLI to initialize, migrate, generate, and audit the store.
+- Origin-based project registration, lock-protected memory indexes, and sensitive-value checks.
+
+### Changed
+
+- `setup shared` follows the format 1 migration procedure and generates the Codex and OpenCode entrypoints.
+- Shared notes default to `all` and can opt out with `metadata.share: claude-only`.
+- Prime Context owns the compaction policy and doctor flags overlapping PreCompact hooks.
+
 ## [3.1.0] - 2026-11-26
 
 ### Added

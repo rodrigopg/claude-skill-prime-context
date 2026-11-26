@@ -21,26 +21,57 @@ session's learnings into those same files, so the next session starts smarter).
 
 ## Memory location
 
-When shared context is configured, use its global index for cross-project notes and
-resolve private project memory through the shared project index by Git origin. For
-unregistered projects, use the existing Claude project memory location below.
-See [Shared setup](references/shared-setup.md) for the mapping and index locations.
+Shared context is configured when the marker `.prime-context-shared` contains
+`format=1` in `$PRIME_CONTEXT_SHARED_HOME` (default `~/.config/agent-instructions`).
+Use its global `memory/MEMORY.md` for cross-project notes. Use `shared_sync.py resolve`
+for the project index. For unregistered projects, use the existing Claude project
+memory location below.
+
+Run the CLI with Python 3.8 or newer. With the Claude Code plugin, the script is
+`${CLAUDE_PLUGIN_ROOT}/scripts/shared_sync.py`. When only the skill folder is
+installed, including in Codex or OpenCode, use `<skill dir>/scripts/shared_sync.py`.
+See the [shared setup contract](references/shared-setup.md).
 
 ## MEMORY.md format (specification)
 
-`MEMORY.md` lives at `~/.claude/projects/<hash>/memory/MEMORY.md`, where `<hash>` is the
-project's absolute path with every `/` replaced by `-` (Claude Code's project-folder convention,
-e.g. `/home/dev/app` → `-home-dev-app`). It is a **pointer index only** — one line per memory
-file, never inline content:
+Claude's local `MEMORY.md` lives at
+`<Claude config>/projects/<folder>/memory/MEMORY.md`. The config root is
+`$CLAUDE_CONFIG_DIR` or `~/.claude`. Claude replaces every character outside
+`[A-Za-z0-9]` in the absolute project path with `-`. Migration considers the first
+`cwd` in each transcript when it still exists and reproduces the folder name.
+The home folder supplies global memory by default, even without transcripts.
+Use `migrate --map=CLAUDE-FOLDER=PATH` to bind an unmapped folder explicitly.
+
+Add new entries as pointers, one per memory file. Migrated indexes can also
+contain prose preserved from the original indexes:
 
 ```markdown
 - [Short title](filename.md) — one-line hook describing when this matters
 ```
 
-Each referenced memory file is self-contained Markdown, optionally with frontmatter
-(`name`, `description`, `type: user|feedback|project|reference`). Rules:
+Each referenced memory file is self-contained Markdown. Use this frontmatter
+for shared notes:
 
-- MEMORY.md never holds memory content, only pointers — keeps the index cheap to scan.
+```yaml
+---
+name: <slug>
+description: <one line>
+metadata:
+  type: user|feedback|project|reference
+  share: all|claude-only
+---
+```
+
+An absent `metadata.share` means `all`. Other harnesses must skip notes marked
+`claude-only`. Doctor flags legacy top-level `type` as LOW. In Claude Code the
+plugin runs an incremental, time-bounded quarantine at SessionStart and resumes
+unfinished work on the next run. Quarantine backups stay in `.state/backups/`.
+Run `sync --check` to find
+newly written sensitive shared notes or `quarantine --apply` to mark them
+Claude-only with backups. Remove sensitive values from credentials and attachments
+at their source.
+
+- Keep new memory content in linked notes so the index stays cheap to scan.
 - Dead pointers (file missing) are flagged by `doctor` and during `load`.
 - Memory files are point-in-time — warn when the newest is older than 7 days.
 
@@ -78,7 +109,13 @@ starts smarter.
    everything else untouched.
 4. For learnings that don't contradict anything, check the target file — skip anything
    already recorded; update in place if the learning supersedes an existing line.
-5. Report one bullet per learning written or memory rewritten/deleted, with its
+5. In shared mode, stage the note privately and run `shared_sync.py check-note FILE`.
+   If the check fails, rewrite the draft without the sensitive value and check
+   again. When recording a credential, point to its storage location. Once the
+   check passes, publish the note and add a new pointer with
+   `shared_sync.py append-index INDEXFILE LINE --apply`. Concurrent appends are
+   serialized and commit atomically without creating a backup for each pointer.
+6. Report one bullet per learning written or memory rewritten/deleted, with its
    destination file. Nothing durable in the session → say `learn: nothing new` and stop.
    Never touch AGENTS.md itself (rules there are managed via `improve`).
 
@@ -89,9 +126,12 @@ starts smarter.
 Load one area's context on demand.
 
 **Flow:**
-1. If shared context is configured, consult the applicable indexes and load only
-   notes relevant to the area. Otherwise read the legacy Claude project index and
-   its linked files if it exists. Disclose broken pointers in Verification.
+1. If shared context is configured, consult the global index and run
+   `shared_sync.py resolve` for the project index. Load only notes relevant to
+   the area. If resolve exits 4 or 5, use the legacy Claude project index if
+   it exists. Outside Claude Code, inspect each note's frontmatter before
+   loading its body and skip notes with `metadata.share: claude-only`. Disclose
+   broken pointers in Verification.
 2. Resolve the area argument:
    - Exact filename match on `.claude/context/<area>.md` wins.
    - Otherwise case-insensitive substring match against files in `.claude/context/`
@@ -190,8 +230,9 @@ If a task touches multiple areas, read the relevant files in parallel.
 
 ## Command: `setup shared`
 
-Use [Shared setup](references/shared-setup.md) to connect existing global rules,
-repository instructions, and curated memory across Claude Code, Codex, and OpenCode.
+Follow the [shared setup procedure](references/shared-setup.md). Initialize the
+store, review the migration plan, close Claude Code sessions before applying it,
+generate the entrypoints, and run doctor.
 Match the complete `setup shared` argument before the standalone `setup` command.
 
 ---
@@ -214,7 +255,7 @@ Match the complete `setup shared` argument before the standalone `setup` command
    - **Fallback (Windows, `core.symlinks=false`, or any environment where symlinks fail):**
      create a regular `CLAUDE.md` containing only the import line `@AGENTS.md` — Claude Code's
      import syntax gives the same single-source-of-truth effect without a symlink.
-7. Create `~/.claude/projects/<hash>/memory/MEMORY.md` containing the format spec header:
+7. Create `<Claude config>/projects/<folder>/memory/MEMORY.md` containing the format spec header:
    ```markdown
    # Memory index — one pointer per line, content lives in the linked files
    <!-- - [Short title](filename.md) — one-line hook -->
@@ -241,6 +282,9 @@ names another one. Resolve the complete command before matching an area name.
 ## Command: `doctor`
 
 **Goal:** audit the context structure for drift. Read-only — reports, never fixes silently.
+
+Run `shared_sync.py doctor` in addition to the project checks below. Pass
+`--claude-home DIR` if auditing a different Claude configuration.
 
 **Checks:**
 

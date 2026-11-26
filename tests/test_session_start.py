@@ -1,24 +1,26 @@
 #!/usr/bin/env python3
 """Self-check for hooks/session_start.py — run: python3 tests/test_session_start.py"""
-import os
 import subprocess
 import sys
 import tempfile
 from pathlib import Path
+
+from isolated_env import isolated_env
 
 HOOK = Path(__file__).resolve().parent.parent / "hooks" / "session_start.py"
 
 
 def run_in(tmp: Path) -> str:
     result = subprocess.run(
-        [sys.executable, str(HOOK)], cwd=tmp, capture_output=True, text=True, timeout=10
+        [sys.executable, str(HOOK)], cwd=tmp, env=isolated_env(tmp),
+        capture_output=True, encoding="utf-8", timeout=10,
     )
     assert result.returncode == 0, f"hook must always exit 0, got {result.returncode}"
     return result.stdout
 
 
 def main() -> None:
-    with tempfile.TemporaryDirectory() as td:
+    with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parent) as td:
         tmp = Path(td)
 
         # 1. No structure → silent
