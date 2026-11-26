@@ -3,6 +3,19 @@
 A Claude Code plugin for efficient project context: a **thin AGENTS.md router** plus
 **area context files loaded on demand** — never everything at once.
 
+## Quick start
+
+| Want to | Run Prime Context with |
+| --- | --- |
+| Share rules and curated memory across assistants | `setup shared` |
+| Load context for an area | The area name, such as `api` |
+| Record a durable learning | `learn` |
+| Check instructions and memory links | `doctor` |
+| Inspect or enable session compaction | `compaction status` or `compaction enable` |
+
+In Claude Code, invoke `/prime-context:prime-context <mode>`. In Codex and
+OpenCode, ask the assistant to use the Prime Context skill with that mode.
+
 ## Philosophy
 
 `AGENTS.md` must be **thin**. It is loaded in every session — every line costs tokens in
@@ -53,6 +66,17 @@ assistant to use Prime Context in `setup shared` mode. See the
 [shared setup guide](skills/prime-context/references/shared-setup.md).
 
 Retain the existing standalone setup for projects whose context is local to Claude Code.
+
+## Session compaction
+
+Use `compaction status` to inspect current behavior, `compaction enable` to
+opt in, and `compaction disable` to restore the previous settings. Claude Code
+uses the bundled hook, Codex uses its summary prompt setting, and OpenCode v2
+uses its own summary and buffer. See the [compaction guide](skills/prime-context/references/compaction.md).
+
+If you installed `share-harness-instructions`, use `setup shared` to check your
+existing Markdown paths. Once Prime Context is available in a new session,
+remove the older skill or plugin. Your existing rules and memories stay in place.
 
 ## Structure managed by the plugin
 

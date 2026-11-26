@@ -9,6 +9,7 @@ Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [S
 
 - `setup shared` for shared global rules, repository instructions, and private Markdown memory across Claude Code, Codex, and OpenCode.
 - Shared memory support for `learn`, area loading, and `doctor`.
+- Optional compaction settings for Claude Code, Codex and OpenCode v2, including a shared summary policy and an opt-in Claude Code hook.
 
 ## [3.0.0] - 2026-07-31
 

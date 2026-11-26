@@ -1,7 +1,7 @@
 ---
 name: prime-context
-description: Manage thin AGENTS.md files, load context by area, capture durable learnings, and audit project context. Use setup shared to share rules and curated memory across Claude Code, Codex, and OpenCode.
-argument-hint: "[learn|area|improve|setup|setup shared|doctor] (empty = learn)"
+description: Manage thin AGENTS.md files, load context by area, capture durable learnings, and audit project context. Use setup shared to share rules and curated memory across Claude Code, Codex, and OpenCode. Use compaction to inspect or configure native session summarization.
+argument-hint: "[learn|area|improve|setup|setup shared|compaction|doctor] (empty = learn)"
 allowed-tools: [Read, Glob, Grep, Edit, Write, Bash]
 ---
 
@@ -230,6 +230,14 @@ and how to add learnings (a file in `memory/` + a pointer line in `MEMORY.md`).
 
 ---
 
+## Command: `compaction [status|enable|disable]`
+
+Use [Compaction](references/compaction.md). Bare `compaction` means `status` and is
+read-only. `enable` and `disable` apply to the active harness unless the user
+names another one. Resolve the complete command before matching an area name.
+
+---
+
 ## Command: `doctor`
 
 **Goal:** audit the context structure for drift. Read-only — reports, never fixes silently.
@@ -256,7 +264,8 @@ End with `doctor: N findings` or `doctor: clean`. Offer to apply fixes only afte
 ## General rules
 
 - Never modify context files during `load` — read only. Writes happen only via `learn`,
-  `improve`, `setup`, and `setup shared`.
+  `improve`, `setup`, and `setup shared`. Change compaction settings only through
+  the explicit `compaction enable` or `compaction disable` workflow.
 - Blocks auto-managed by MCP servers are untouchable.
 - Memory files are point-in-time — warn when > 7 days without updates.
-- Unrecognized mode: list available commands (`learn`, `<area>`, `improve`, `setup`, `setup shared`, `doctor`) and ask.
+- Unrecognized mode: list available commands (`learn`, `<area>`, `improve`, `setup`, `setup shared`, `compaction`, `doctor`) and ask.
