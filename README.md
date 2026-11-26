@@ -85,8 +85,9 @@ Retain the existing standalone setup for projects whose context is local to Clau
 
 Use `compaction status` to inspect current behavior, `compaction enable` to
 opt in, and `compaction disable` to restore the previous settings. Claude Code
-uses the bundled hook, Codex uses its summary prompt setting, and OpenCode v2
-uses its own summary and buffer. See the [compaction guide](skills/prime-context/references/compaction.md).
+uses the bundled hook, Codex can apply a custom prompt with local compaction,
+and OpenCode v2 uses its own summary and buffer. Codex remote compaction keeps
+the provider's summary policy. See the [compaction guide](skills/prime-context/references/compaction.md).
 
 If you installed `share-harness-instructions`, use `setup shared` to check your
 existing Markdown paths. Once Prime Context is available in a new session,

@@ -15,13 +15,14 @@ session is compacted.
 - **`compaction disable`** restores only the settings changed by this command.
   The harness can continue using its built-in compaction.
 
-Before editing, take a timestamped backup. Record each changed key, its original
-value or absence, and its applied value in a private record scoped to the config
-file. Use the user's existing shared instructions directory, or the active
-config directory when that store is absent. Repeated enables are a no-op when
-the settings match. When disabling, restore a key only if its current value
-still matches the applied value. Report intervening edits for reconciliation.
-Preserve existing JSONC comments and TOML tables.
+Before editing, take a timestamped local backup. Record each changed key, its
+original value or absence, and its applied value in a private record beside
+the affected config file, outside shared and synced directories. If the config
+itself is synced, use an unsynced local state directory and key the record by
+the config file's absolute path. Keep backups there too. Repeated enables
+are a no-op when settings match. When disabling, restore a key only if its
+current value still matches the applied value. Report intervening edits for
+reconciliation. Preserve existing JSONC comments and TOML tables.
 
 ## Claude Code
 
@@ -45,10 +46,14 @@ replacement before enabling Prime Context. Preserve unrelated hooks.
 
 ## Codex
 
-Set the documented `compact_prompt` configuration value to the contents of the
-shared policy. This replaces the native summary prompt. Preserve an existing
-custom prompt unless the user approves replacing it. Codex's `PreCompact` ignores
-plain text on stdout, so use the native prompt setting.
+Determine whether the active model and provider use local compaction before
+editing the summary prompt. Only with confirmed local compaction, set the
+documented `compact_prompt` value to the shared policy, preserving an existing
+custom prompt unless the user approves replacing it. Remote compaction, such
+as the OpenAI Responses path, uses the provider's summary policy and bypasses
+this setting. For remote or unknown compaction, leave `compact_prompt` untouched
+and report that Prime Context has not applied a custom summary policy.
+Codex's `PreCompact` ignores plain text on stdout.
 
 Keep the existing timing by default. If the user asks for 85%, verify the
 effective context window of the configured model and use the integer floor of
@@ -77,5 +82,6 @@ threshold in a real automatic compaction before claiming a runtime result.
 The Claude approach builds on the [proposal by João Vitor Ribeiro Santos](https://github.com/dataagile/claude-marketplace/pull/205).
 
 - [Claude Code hooks](https://code.claude.com/docs/en/hooks#precompact)
+- [Codex local and remote compaction paths](https://github.com/openai/codex/blob/main/codex-rs/core/src/tasks/compact.rs)
 - [Codex hooks](https://learn.chatgpt.com/docs/hooks#precompact)
 - [OpenCode compaction](https://opencode.ai/docs/compaction/)
