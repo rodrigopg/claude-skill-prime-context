@@ -3,6 +3,13 @@
 All notable changes to this project will be documented in this file.
 Format: [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); versioning: [SemVer](https://semver.org/).
 
+## [3.1.0] - 2026-11-26
+
+### Added
+
+- `setup shared` for shared global rules, repository instructions, and private Markdown memory across Claude Code, Codex, and OpenCode.
+- Shared memory support for `learn`, area loading, and `doctor`.
+
 ## [3.0.0] - 2026-07-31
 
 ### Changed

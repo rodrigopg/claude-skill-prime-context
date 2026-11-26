@@ -23,6 +23,7 @@ CLAUDE.md rubric that `improve`/`doctor` apply.
 | `/prime-context <area>` | Load one area's context (e.g. `filament`, `api`, `prod`); fuzzy-matches file names |
 | `/prime-context improve` | Refactor a bloated `AGENTS.md` → thin router + `.claude/context/` files |
 | `/prime-context setup` | Bootstrap the context structure in a new project from scratch |
+| `/prime-context setup shared` | Share rules and curated memory across Claude Code, Codex, and OpenCode |
 | `/prime-context doctor` | Audit the structure: dangling routes, orphan files, dead memory pointers, staleness, weight |
 
 Every `/prime-context <area>` load ends with a **Verification** block listing the files
@@ -43,6 +44,15 @@ Or manually as a bare skill (no hooks):
 git clone https://github.com/rodrigopg/claude-skill-prime-context /tmp/prime-context
 cp -r /tmp/prime-context/skills/prime-context ~/.claude/skills/
 ```
+
+## Shared context across harnesses
+
+Run `/prime-context setup shared` in Claude Code. For Codex and OpenCode, copy
+`skills/prime-context/` into `~/.agents/skills/prime-context/` and ask the
+assistant to use Prime Context in `setup shared` mode. See the
+[shared setup guide](skills/prime-context/references/shared-setup.md).
+
+Retain the existing standalone setup for projects whose context is local to Claude Code.
 
 ## Structure managed by the plugin
 
