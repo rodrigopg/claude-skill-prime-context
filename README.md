@@ -58,6 +58,20 @@ git clone https://github.com/rodrigopg/claude-skill-prime-context /tmp/prime-con
 cp -r /tmp/prime-context/skills/prime-context ~/.claude/skills/
 ```
 
+### Codex and OpenCode
+
+For a fresh install, run the following after the release reaches the default branch:
+
+```sh
+git clone https://github.com/rodrigopg/claude-skill-prime-context ~/prime-context
+mkdir -p ~/.agents/skills
+cp -R ~/prime-context/skills/prime-context ~/.agents/skills/
+```
+
+Open a new session and ask it to use the `prime-context` skill. To update, pull
+the checkout and copy the skill folder again. The portable skill includes all
+references and assets. Your project and personal memory files remain outside it.
+
 ## Shared context across harnesses
 
 Run `/prime-context setup shared` in Claude Code. For Codex and OpenCode, copy
