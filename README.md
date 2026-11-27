@@ -76,10 +76,59 @@ references and assets. Your project and personal memory files remain outside it.
 
 Run `/prime-context setup shared` in Claude Code. For Codex and OpenCode, copy
 `skills/prime-context/` into `~/.agents/skills/prime-context/` and ask the
-assistant to use Prime Context in `setup shared` mode. See the
-[shared setup guide](skills/prime-context/references/shared-setup.md).
+assistant to use Prime Context in `setup shared` mode. Both use the bundled
+`shared_sync.py`, available in the repository's `scripts/` or in the standalone
+skill's `scripts/` directory. Substitute its installed path below:
 
-Retain the existing standalone setup for projects whose context is local to Claude Code.
+```text
+python shared_sync.py init --apply
+python shared_sync.py migrate
+python shared_sync.py migrate --apply
+python shared_sync.py sync --apply
+python shared_sync.py doctor
+```
+
+Review the migration plan and close Claude Code sessions before running
+`migrate --apply`. Migration checks each source tree again before replacing it
+with a symlink. The shared home is
+`$PRIME_CONTEXT_SHARED_HOME` or `~/.config/agent-instructions` by default.
+If a 3.1.0 store has hand-authored rules in its top-level `AGENTS.md`, `init`
+backs them up and moves them into `rules/AGENTS.md`. It asks for a manual merge
+if both files already contain different rules.
+
+```text
+<shared>/
+├── .prime-context-shared    # format=1 and creation timestamp
+├── rules/
+│   ├── AGENTS.md            # Authored global rules
+│   └── *.md                 # Other authored rules
+├── sources.list             # Ordered inputs
+├── AGENTS.md                # Generated entrypoint
+├── memory/
+│   ├── MEMORY.md            # Global pointers
+│   └── *.md
+└── projects/
+    ├── INDEX.md
+    └── <host>__<owner>__<repo>/
+        ├── MEMORY.md        # Project pointers
+        └── *.md
+```
+
+The [shared setup contract](skills/prime-context/references/shared-setup.md) covers
+origin keys, memory visibility, and entrypoint paths. Migration verifies project
+folders using the first `cwd` of each Claude transcript. It ignores historical
+paths that are missing or that do not match the folder name. The current home
+folder supplies global memory by default, even without transcripts. Migration
+reports mapped folders and groups unmapped folders by reason. Use repeatable
+`migrate --map=CLAUDE-FOLDER=PATH` for folders that need an explicit mapping.
+Migration preserves safe attachments and blocks text attachments with phones or
+secrets. `sync --check` flags newly written notes that contain these patterns.
+Run `quarantine --apply` to mark affected notes Claude-only. The Claude plugin
+also runs an incremental check at session start, resuming on the next session
+if it reaches its time budget. Quarantine backups go under `.state/backups/`.
+Other harnesses must skip Claude-only notes. `sync` expands rule-file `@imports`
+up to five levels and rejects missing imported files.
+Standalone `setup` remains available for projects whose context is local to Claude Code.
 
 ## Session compaction
 
@@ -106,13 +155,14 @@ project/
         ├── db.md           # Loaded only when the schema is needed
         └── <area>.md       # One per work domain
 
-~/.claude/projects/<hash>/memory/
-├── MEMORY.md               # Pointer index: one line per memory file, never inline content
+~/.claude/projects/<folder>/memory/
+├── MEMORY.md               # Pointer index with any preserved legacy prose
 └── *.md                    # Self-contained learnings, referenced from MEMORY.md
 ```
 
-`<hash>` is the project's absolute path with `/` replaced by `-`
-(e.g. `/home/dev/app` → `-home-dev-app`) — Claude Code's project-folder convention.
+Claude forms `<folder>` by replacing every character outside `[A-Za-z0-9]`
+in the absolute path with `-`. Both `/work/my_app` and `/work/my-app` become
+`-work-my-app`. Migration uses transcripts to resolve that ambiguity.
 
 ### MEMORY.md format
 
@@ -120,8 +170,8 @@ project/
 - [Short title](filename.md) — one-line hook describing when this matters
 ```
 
-One pointer per line. Content lives in the linked files. `doctor` flags dead pointers and
-memory older than 7 days.
+Add one pointer per line. Migration keeps existing index prose. `doctor` flags dead
+pointers and memory older than 7 days.
 
 ## Session-start hook
 
@@ -129,9 +179,10 @@ When installed as a plugin, a zero-cost hook (no LLM calls) runs at session star
 
 - announces the available context areas (`/prime-context <area>` discoverability), and
 - warns when the AGENTS.md routing table points at missing files, or context files exist
-  that no route mentions.
+  that no route mentions, and
+- runs shared memory quarantine for format 1 with a two-second safety timeout.
 
-It is completely silent on projects without a prime-context structure.
+The hook stays silent when there are no findings or quarantine changes.
 
 ## Windows / no-symlink environments
 
@@ -143,6 +194,8 @@ syntax — giving the same single source of truth without a symlink.
 
 ```bash
 python3 tests/test_session_start.py
+python3 tests/test_pre_compact.py
+python3 tests/test_shared_sync.py
 ```
 
 ## License
